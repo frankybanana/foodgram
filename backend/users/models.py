@@ -27,3 +27,23 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         return self.is_staff or self.is_superuser
+
+
+class Subscription(models.Model):
+    follower = models.ForeignKey(CustomUser,
+                                 related_name='following_subscriptions',
+                                 on_delete=models.CASCADE,
+                                 verbose_name='Подписчик')
+    following = models.ForeignKey(CustomUser,
+                                  related_name='follower_subscriptions',
+                                  on_delete=models.CASCADE,
+                                  verbose_name='Автор рецепта')
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = (models.UniqueConstraint(fields=("follower", "following"),
+                                               name="unique_user_following",),)
+
+    def __str__(self):
+        return (f'{self.follower.username} подписан на {self.following.username}')
