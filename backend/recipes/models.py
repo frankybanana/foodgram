@@ -119,3 +119,44 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return (f'{self.amount} {self.ingredient.measurement_unit}'
                 f'{self.ingredient.name} в {self.recipe.name}')
+
+
+class FavoriteRecipe(models.Model):
+    recipe = models.ForeignKey(Recipe,
+                               related_name='favorites',
+                               on_delete=models.CASCADE,
+                               verbose_name='Избранные рецепты')
+    user = models.ForeignKey(User,
+                             related_name='favorite_recipes',
+                             on_delete=models.CASCADE,
+                             verbose_name='Пользователь')
+
+    class Meta:
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+        ordering = ('user',)
+        unique_together = ('recipe', 'user')
+
+    def __str__(self):
+        return f'{self.user.username} любит {self.recipe.name}'
+
+
+class ShoppingCart(models.Model):
+    recipe = models.ForeignKey(Recipe,
+                               related_name='in_carts',
+                               on_delete=models.CASCADE,
+                               verbose_name='Рецепт в списке')
+
+    user = models.ForeignKey(User,
+                             related_name='cart',
+                             on_delete=models.CASCADE,
+                             verbose_name='Владелец списка')
+
+    class Meta:
+        verbose_name = 'Рецепт в корзине'
+        verbose_name_plural = 'Рецепты в корзине'
+        ordering = ('user',)
+        unique_together = ('recipe', 'user')
+
+    def __str__(self):
+        return f'У {self.user.username} в корзине {self.recipe.name}'
