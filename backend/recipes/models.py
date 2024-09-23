@@ -25,7 +25,7 @@ class Tag(models.Model):
                             verbose_name='Слаг')
 
     class Meta:
-        verbose_name = 'Тег'
+        verbose_name = 'тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
         unique_together = ('name', 'slug')
@@ -41,7 +41,7 @@ class Ingredient(models.Model):
                                         verbose_name='Единица измерения')
 
     class Meta:
-        verbose_name = 'Ингредиент'
+        verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
         unique_together = ('name', 'measurement_unit')
@@ -81,7 +81,7 @@ class Recipe(models.Model):
                                       verbose_name='Время создания')
 
     class Meta:
-        verbose_name = 'Рецепт'
+        verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('-created_at',)
         unique_together = ('name', 'author')

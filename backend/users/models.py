@@ -17,7 +17,7 @@ class CustomUser(AbstractUser):
                                default=None)
 
     class Meta:
-        verbose_name = 'Пользователь'
+        verbose_name = 'пользователя'
         verbose_name_plural = 'Пользователи'
         ordering = ('id',)
 
