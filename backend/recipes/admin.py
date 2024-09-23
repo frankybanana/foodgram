@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
 
-from .models import Ingredient, Recipe, RecipeIngredient, Tag
 from core.constants import INGREDIENTS_PER_PAGE, OBJ_PER_PAGE
+from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
 
 @admin.register(Tag)
@@ -25,7 +25,9 @@ class RecipeIngredientInlineFormSet(BaseInlineFormSet):
         super().clean()
         if any(self.errors):
             return
-        if not any(form.cleaned_data and not form.cleaned_data.get('DELETE', False) for form in self.forms):
+        if not any(form.cleaned_data
+                   and not form.cleaned_data.get('DELETE', False)
+                   for form in self.forms):
             raise ValidationError('Нужно добавить хотя бы 1 ингредиент.')
 
 
@@ -53,7 +55,8 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
-        return ', '.join([ingredient.name for ingredient in obj.ingredients.all()])
+        return ', '.join([ingredient.name for
+                          ingredient in obj.ingredients.all()])
 
     @admin.display(description='Теги')
     def get_tags(self, obj):

@@ -11,7 +11,7 @@ from core.constants import (MAX_TAG_LENGTH,
                             MIN_AMOUNT_INGREDIENTS,
                             MAX_AMOUNT_INGREDIENTS)
 
-from .utils import get_hashed_short_url
+from .views import get_hashed_short_url
 
 User = get_user_model()
 
@@ -69,12 +69,14 @@ class Recipe(models.Model):
                                   verbose_name='Теги')
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
-        validators=[MinValueValidator(MIN_COOKING_TIME,
-                                      message=(f'Минимальное время приготовления '
-                                               f'не может быть меньше {MIN_COOKING_TIME}'),),
-                    MaxValueValidator(MAX_COOKING_TIME,
-                                      message=(f'Максимальное время приготовления '
-                                               f'не может быть больше {MAX_COOKING_TIME}'),)],)
+        validators=[MinValueValidator
+                    (MIN_COOKING_TIME,
+                     message=(f'Минимальное время приготовления '
+                              f'не может быть меньше {MIN_COOKING_TIME}'),),
+                    MaxValueValidator
+                    (MAX_COOKING_TIME,
+                     message=(f'Максимальное время приготовления '
+                              f'не может быть больше {MAX_COOKING_TIME}'),)],)
     created_at = models.DateTimeField(auto_now_add=True,
                                       verbose_name='Время создания')
 
@@ -102,13 +104,17 @@ class RecipeIngredient(models.Model):
                                    related_name='recipe',
                                    on_delete=models.CASCADE,
                                    verbose_name='Ингредиенты')
-    amount = models.IntegerField(verbose_name='Количество',
-                                 validators=(MinValueValidator(MIN_AMOUNT_INGREDIENTS,
-                                                               message=(f'Количество не может '
-                                                                        f'быть меньше {MIN_AMOUNT_INGREDIENTS}'),),
-                                             MaxValueValidator(MAX_AMOUNT_INGREDIENTS,
-                                                               message=(f'Количество не может '
-                                                                        f'быть больше {MAX_AMOUNT_INGREDIENTS}'),)),)
+    amount = models.IntegerField(
+        verbose_name="Количество",
+        validators=(
+            MinValueValidator(
+                MIN_AMOUNT_INGREDIENTS,
+                message=('Количество не может быть меньше '
+                         '{MIN_AMOUNT_INGREDIENTS}'),),
+            MaxValueValidator(
+                MAX_AMOUNT_INGREDIENTS,
+                message=('Количество не может быть больше '
+                         '{MAX_AMOUNT_INGREDIENTS}'),)),)
 
     class Meta:
         verbose_name = 'Ингредиент'
