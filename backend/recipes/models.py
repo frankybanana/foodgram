@@ -2,12 +2,16 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from core.constants import (
-    MAX_TAG_LENGTH,
-    MAX_SLUG_LENGTH,
-    MAX_INGR_NAME_LENGTH,
-    MAX_UNIT_LENGTH,
-)
+from core.constants import (MAX_TAG_LENGTH,
+                            MAX_SLUG_LENGTH,
+                            MAX_NAME_LENGTH,
+                            MAX_UNIT_LENGTH,
+                            MIN_COOKING_TIME,
+                            MAX_COOKING_TIME,
+                            MIN_AMOUNT_INGREDIENTS,
+                            MAX_AMOUNT_INGREDIENTS)
+
+from .utils import get_hashed_short_url
 
 User = get_user_model()
 
@@ -31,7 +35,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=MAX_INGR_NAME_LENGTH,
+    name = models.CharField(max_length=MAX_NAME_LENGTH,
                             verbose_name='Ингредиент')
     measurement_unit = models.CharField(max_length=MAX_UNIT_LENGTH,
                                         verbose_name='Единица измерения')
@@ -44,3 +48,74 @@ class Ingredient(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} {self.measurement_unit}"
+
+
+class Recipe(models.Model):
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               related_name='recipes',
+                               verbose_name='Автор рецепта')
+    name = models.CharField(max_length=MAX_NAME_LENGTH,
+                            verbose_name='Название рецепта')
+    image = models.ImageField(upload_to='recipes/images/',
+                              verbose_name='Фото готового блюда')
+    text = models.TextField(verbose_name='Описание рецепта')
+    ingredients = models.ManyToManyField(Ingredient,
+                                         related_name='recipes',
+                                         through='RecipeIngredient',
+                                         verbose_name='Ингредиенты блюда')
+    tags = models.ManyToManyField(Tag,
+                                  related_name='recipes',
+                                  verbose_name='Теги')
+    cooking_time = models.IntegerField(
+        verbose_name='Время приготовления',
+        validators=[MinValueValidator(MIN_COOKING_TIME,
+                                      message=(f'Минимальное время приготовления '
+                                               f'не может быть меньше {MIN_COOKING_TIME}'),),
+                    MaxValueValidator(MAX_COOKING_TIME,
+                                      message=(f'Максимальное время приготовления '
+                                               f'не может быть больше {MAX_COOKING_TIME}'),)],)
+    created_at = models.DateTimeField(auto_now_add=True,
+                                      verbose_name='Время создания')
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ('-created_at',)
+        unique_together = ('name', 'author')
+
+    def __str__(self):
+        return f"{self.name}. Автор: {self.author.username}"
+
+    @property
+    def short_url(self):
+        short_url = get_hashed_short_url(self.id)
+        return short_url
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe,
+                               related_name='ingredient',
+                               on_delete=models.CASCADE,
+                               verbose_name='Рецепты')
+    ingredient = models.ForeignKey(Ingredient,
+                                   related_name='recipe',
+                                   on_delete=models.CASCADE,
+                                   verbose_name='Ингредиенты')
+    amount = models.IntegerField(verbose_name='Количество',
+                                 validators=(MinValueValidator(MIN_AMOUNT_INGREDIENTS,
+                                                               message=(f'Количество не может '
+                                                                        f'быть меньше {MIN_AMOUNT_INGREDIENTS}'),),
+                                             MaxValueValidator(MAX_AMOUNT_INGREDIENTS,
+                                                               message=(f'Количество не может '
+                                                                        f'быть больше {MAX_AMOUNT_INGREDIENTS}'),)),)
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ('recipe',)
+        unique_together = ('recipe', 'ingredient')
+
+    def __str__(self):
+        return (f'{self.amount} {self.ingredient.measurement_unit}'
+                f'{self.ingredient.name} в {self.recipe.name}')
