@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
 
-from core.constants import INGREDIENTS_PER_PAGE, OBJ_PER_PAGE
+from foodgram_backend.constants import INGREDIENTS_PER_PAGE, OBJ_PER_PAGE
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
 

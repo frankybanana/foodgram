@@ -2,14 +2,14 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from core.constants import (MAX_TAG_LENGTH,
-                            MAX_SLUG_LENGTH,
-                            MAX_NAME_LENGTH,
-                            MAX_UNIT_LENGTH,
-                            MIN_COOKING_TIME,
-                            MAX_COOKING_TIME,
-                            MIN_AMOUNT_INGREDIENTS,
-                            MAX_AMOUNT_INGREDIENTS)
+from foodgram_backend.constants import (MAX_TAG_LENGTH,
+                                        MAX_SLUG_LENGTH,
+                                        MAX_NAME_LENGTH,
+                                        MAX_UNIT_LENGTH,
+                                        MIN_COOKING_TIME,
+                                        MAX_COOKING_TIME,
+                                        MIN_AMOUNT_INGREDIENTS,
+                                        MAX_AMOUNT_INGREDIENTS)
 
 from .views import get_hashed_short_url
 
