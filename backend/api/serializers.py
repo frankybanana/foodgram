@@ -80,3 +80,58 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
                   'name',
                   'image',
                   'cooking_time',)
+
+
+class SubscriptionsSerializer(UserSerializer):
+
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'avatar',
+                  'is_subscribed',
+                  'recipes',
+                  'recipes_count',)
+
+    def get_is_subscribed(self, obj):
+        return True
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes_limit = request.query_params.get('recipes_limit')
+
+        if recipes_limit:
+            try:
+                recipes_limit = int(recipes_limit)
+                recipes = obj.recipes.all()[:recipes_limit]
+            except ValueError:
+                recipes = obj.recipes.all()
+        else:
+            recipes = obj.recipes.all()
+        return ShortRecipeSerializer(recipes, many=True, context=self.context).data
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ingredient
+        fields = '__all__'
+
+
+
