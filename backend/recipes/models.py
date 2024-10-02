@@ -1,18 +1,33 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from backend.constants import (
+    MAX_AMOUNT_INGREDIENTS,
+    MAX_COOKING_TIME,
+    MAX_NAME_LENGTH,
+    MAX_TAG_LENGTH,
+    MAX_SLUG_LENGTH,
+    MAX_UNIT_LENGTH,
+    MIN_AMOUNT_INGREDIENTS,
+    MIN_COOKING_TIME,
+)
 
 User = get_user_model()
 
 
 class Ingredient(models.Model):
 
-    name = models.CharField('Ингредиент', max_length=50,)
-    measurement_unit = models.CharField('Единица измерения', max_length=10)
+    name = models.CharField(max_length=MAX_NAME_LENGTH,
+                            verbose_name='Ингредиент')
+    measurement_unit = models.CharField(max_length=MAX_UNIT_LENGTH,
+                                        verbose_name='Единица измерения')
 
     class Meta:
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        ordering = ('name',)
+        unique_together = ('name', 'measurement_unit')
 
     def __str__(self):
         return self.name
@@ -20,12 +35,16 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
 
-    name = models.CharField('Тег', max_length=25)
-    slug = models.CharField('Слаг', max_length=25)
+    name = models.CharField(max_length=MAX_TAG_LENGTH,
+                            verbose_name='Тег')
+    slug = models.CharField(max_length=MAX_SLUG_LENGTH,
+                            verbose_name='Слаг')
 
     class Meta:
         verbose_name = 'тег'
         verbose_name_plural = 'Теги'
+        ordering = ('name',)
+        unique_together = ('name', 'slug')
 
     def __str__(self):
         return self.name
@@ -57,9 +76,24 @@ class Recipe(models.Model):
     )
     name = models.CharField('Название', max_length=200)
     text = models.TextField('Описание')
-    cooking_time = models.PositiveSmallIntegerField(
-        'Время приготовления',
-        validators=[MinValueValidator(1)],
+    cooking_time = models.IntegerField(
+        verbose_name='Время приготовления',
+        validators=[
+            MinValueValidator(
+                MIN_COOKING_TIME,
+                message=(
+                    'Минимальное время приготовления '
+                    f'не может быть меньше {MIN_COOKING_TIME}'
+                ),
+            ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                message=(
+                    'Максимальное время приготовления '
+                    f'не может быть больше {MAX_COOKING_TIME}'
+                ),
+            )
+        ],
     )
 
     class Meta:
@@ -83,8 +117,23 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент',
     )
     amount = models.IntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name='Количество',
+        verbose_name="Количество",
+        validators=(
+            MinValueValidator(
+                MIN_AMOUNT_INGREDIENTS,
+                message=(
+                    'Количество ингредиента не может быть '
+                    f'меньше {MIN_AMOUNT_INGREDIENTS}'
+                ),
+            ),
+            MaxValueValidator(
+                MAX_AMOUNT_INGREDIENTS,
+                message=(
+                    'Количество ингредиента не может быть '
+                    f'больше {MAX_AMOUNT_INGREDIENTS}'
+                ),
+            )
+        ),
     )
 
     class Meta:
@@ -156,3 +205,6 @@ class ShoppingCart(models.Model):
                 name='unique_user_recipe_shopping_cart'
             )
         ]
+
+    def __str__(self):
+        return f'У {self.user.username} в корзине {self.recipe.name}'
