@@ -4,7 +4,6 @@ on:
   push
 
 jobs:
-
   steps:
     - name: Check out code
       uses: actions/checkout@v3
