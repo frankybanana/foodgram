@@ -5,9 +5,9 @@ from rest_framework.exceptions import ValidationError
 
 from api.fields import Base64ImageField
 from recipes.models import (
-    Tag, Ingredient, Recipe, RecipeIngredient, FavoriteRecipe, ShoppingCart
+    Tag, Ingredient, Recipe, RecipeIngredient, Favorite, ShoppingCart
 )
-from users.models import Subscription
+from users.models import Follow
 
 User = get_user_model()
 
@@ -52,7 +52,7 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         return (
             self.context.get('request').user.is_authenticated
-            and Subscription.objects.filter(
+            and Follow.objects.filter(
                 follower=self.context.get('request').user,
                 author=obj.id
             ).exists()
@@ -148,7 +148,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         return (
             self.context.get('request').user.is_authenticated
-            and FavoriteRecipe.objects.filter(
+            and Favorite.objects.filter(
                 user=self.context.get('request').user,
                 recipe=obj
             ).exists()

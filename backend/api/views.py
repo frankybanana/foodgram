@@ -34,7 +34,7 @@ from recipes.models import (
     ShoppingCart,
     RecipeIngredient
 )
-from users.models import Subscription
+from users.models import Follow
 
 User = get_user_model()
 
@@ -221,7 +221,7 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            if Subscription.objects.filter(follower=user, author=author).exists():
+            if Follow.objects.filter(follower=user, author=author).exists():
                 return Response(
                     'Вы уже подписаны на этого автора',
                     status=status.HTTP_400_BAD_REQUEST
@@ -235,15 +235,15 @@ class CustomUserViewSet(UserViewSet):
                 author,
                 context={"request": request, }
             )
-            Subscription.objects.create(follower=user, author=author)
+            Follow.objects.create(follower=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if not Subscription.objects.filter(follower=user, author=author).exists():
+        if not Follow.objects.filter(follower=user, author=author).exists():
             return Response(
                 'Подписки не найдено',
                 status=status.HTTP_400_BAD_REQUEST
             )
-        subscribe = get_object_or_404(Subscription, follower=user, author=author)
+        subscribe = get_object_or_404(Follow, follower=user, author=author)
         subscribe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
