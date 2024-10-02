@@ -13,13 +13,13 @@ const About = ({ updateOrders, orders }) => {
     </MetaTags>
 
     <Container>
-      <h1 className={styles.title}>Привет!</h1>
       <div className={styles.content}>
         <div>
-          <h2 className={styles.subtitle}>Что это за сайт?</h2>
+          <h2 className={styles.subtitle}>Привет!</h2>
           <div className={styles.text}>
             <p className={styles.textItem}>
-              Это учебный проект, где я познакомилась с Джанго.
+              Это учебный проект курса, где я познакомилась с Джанго.
+              А это страничка из книжки про Джанго моей дочери. Эта книга не очень помогла в проекте (:
             </p>
             <div><img src={image} /></div>
           </div>
