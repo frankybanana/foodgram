@@ -11,7 +11,7 @@
 ### Данные для доступа к админке:
 🍪 сайт: [foodbananagram.hopto.org](https://www.foodbananagram.hopto.org/)
 
-🍪 username email: admin@example.com
+🍪 email для входа в админку: admin@example.com
 
 🍪 пароль: 123
 
