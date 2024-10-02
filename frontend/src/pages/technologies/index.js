@@ -12,10 +12,10 @@ const Technologies = () => {
     </MetaTags>
     
     <Container>
-      <h1 className={styles.title}>Технологии</h1>
+      <h2 className={styles.title}>Технологии</h2>
       <div className={styles.content}>
         <div>
-          <h2 className={styles.subtitle}>Технологии, которые применены в этом проекте:</h2>
+          <h2 className={styles.subtitle}>В проекте применялись:</h2>
           <div className={styles.text}>
             <ul className={styles.textItem}>
               <li className={styles.textItem}>
@@ -29,6 +29,9 @@ const Technologies = () => {
               </li>
               <li className={styles.textItem}>
                 Djoser
+              </li>
+              <li className={styles.textItem}>
+                Docker
               </li>
             </ul>
           </div>

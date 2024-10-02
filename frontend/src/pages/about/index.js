@@ -19,7 +19,6 @@ const About = ({ updateOrders, orders }) => {
           <div className={styles.text}>
             <p className={styles.textItem}>
               Это учебный проект курса, где я познакомилась с Джанго.
-              А это страничка из книжки про Джанго моей дочери. Эта книга не очень помогла в проекте (:
             </p>
             <div><img src={image} /></div>
           </div>
