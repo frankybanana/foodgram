@@ -7,10 +7,8 @@ from api.views import ShortLinkView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('api.urls')),
-    path('api/', include('djoser.urls')),
-    path('api/auth/', include('djoser.urls.authtoken')),
-    path('s/<str:encoded_id>/', ShortLinkView.as_view(), name='shortlink'),
+    path('api/', include('api.urls')),
+    path('s/<str:encoded_id>/', ShortLinkView.as_view(), name='short_url'),
 ]
 
 if settings.DEBUG:

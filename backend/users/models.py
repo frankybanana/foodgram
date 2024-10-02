@@ -2,7 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from backend.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH
+from backend.constants import (MAX_EMAIL_LENGTH,
+                               MAX_USERNAME_LENGTH,
+                               MAX_PASSWORD_LENGTH)
 
 
 class User(AbstractUser):
@@ -18,8 +20,10 @@ class User(AbstractUser):
         verbose_name='Ник пользователя',
         validators=(RegexValidator(r'^[\w.@+-]+\Z'),),
     )
-    first_name = models.CharField(max_length=MAX_USERNAME_LENGTH, verbose_name='Имя пользователя')
-    last_name = models.CharField(max_length=MAX_USERNAME_LENGTH, verbose_name='Фамилия пользователя')
+    first_name = models.CharField(max_length=MAX_USERNAME_LENGTH,
+                                  verbose_name='Имя пользователя')
+    last_name = models.CharField(max_length=MAX_USERNAME_LENGTH,
+                                 verbose_name='Фамилия пользователя')
     password = models.CharField(max_length=MAX_PASSWORD_LENGTH)
     avatar = models.ImageField(
         upload_to='users/images/',
