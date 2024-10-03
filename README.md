@@ -1,7 +1,7 @@
 ﻿# 🍉 [Foodgram](https://www.foodbananagram.hopto.org/)
 
 ### Данные для доступа к админке:
-🍪 сайт: [foodbananagram.hopto.org](https://www.foodbananagram.hopto.org/)
+🍪 сайт: [foodbananagram.hopto.org](https://foodbananagram.hopto.org/)
 
 🍪 email для входа в админку: admin@example.com
 
