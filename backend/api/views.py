@@ -16,38 +16,34 @@ from rest_framework.views import APIView
 from api.filters import RecipeFilter
 from api.pagination import RecipePagination
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (
-    TagsSerializer,
-    IngredientsSerializer,
-    RecipesSerializer,
-    CreateRecipesSerializer,
-    ShortRecipeSerializer,
-    CustomUserSerializer,
-    FollowSerializer,
-    CustomUserAvatarSerializer,
-)
-from recipes.models import (
-    Tag,
-    Ingredient,
-    Recipe,
-    Favorite,
-    ShoppingCart,
-    RecipeIngredient
-)
+from api.serializers import (CreateRecipesSerializer,
+                             CustomUserAvatarSerializer,
+                             CustomUserSerializer,
+                             FollowSerializer,
+                             IngredientsSerializer,
+                             RecipesSerializer,
+                             ShortRecipeSerializer,
+                             TagsSerializer)
+from recipes.models import (Favorite,
+                            Ingredient,
+                            Recipe,
+                            RecipeIngredient,
+                            ShoppingCart,
+                            Tag)
 from users.models import Follow
 
 User = get_user_model()
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет тега"""
+    """Вьюсет получения тегов."""
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     pagination_class = None
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет ингредиентов"""
+    """Вьюсет получения ингредиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     pagination_class = None
@@ -57,7 +53,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    """Вьюсет рецептов"""
+    """Вьюсет получения/добавления/удаления рецептов."""
     queryset = Recipe.objects.all()
     pagination_class = RecipePagination
     permission_classes = (IsAuthorOrReadOnly,)
@@ -99,7 +95,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk):
-        """Добавление рецепта в избранное"""
+        """Добавление рецепта в избранное."""
 
         return self.add_or_delete(
             Favorite,
@@ -128,6 +124,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     )
     def download_shopping_cart(self, request):
+        """Возвращает список покупок в формате txt."""
         user = request.user
         recipes = ShoppingCart.objects.filter(user=user).values_list('recipe')
         ingredients = (
@@ -167,6 +164,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         url_name='get-link',
     )
     def get_link(self, request, pk=None):
+        """Формирует короткую ссылку на рецепт."""
         recipe = self.get_object()
         encode_id = baseconv.base64.encode(recipe.id)
         short_link = request.build_absolute_uri(
@@ -176,6 +174,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
 
 class ShortLinkView(APIView):
+    """Проверка ссылки и перенаправление."""
 
     def get(self, request, encoded_id):
         if not set(encoded_id).issubset(set(baseconv.BASE64_ALPHABET)):
@@ -188,7 +187,7 @@ class ShortLinkView(APIView):
 
 
 class CustomUserViewSet(UserViewSet):
-    """Вьюсет пользователя"""
+    """Вьюсет пользователя."""
 
     serializer_class = CustomUserSerializer
     pagination_class = LimitOffsetPagination
@@ -203,6 +202,7 @@ class CustomUserViewSet(UserViewSet):
         detail=True
     )
     def avatar(self, request, id):
+        """Добавляет аватар пользователя."""
         user = request.user
         if request.method == 'PUT':
             serializers = CustomUserAvatarSerializer(user, data=request.data)
@@ -218,6 +218,7 @@ class CustomUserViewSet(UserViewSet):
         detail=True
     )
     def subscribe(self, request, id):
+        """Подписывает текущего юзера на другого пользователя."""
         user = request.user
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
@@ -252,6 +253,7 @@ class CustomUserViewSet(UserViewSet):
         detail=False,
     )
     def subscriptions(self, request):
+        """Возвращает пользователей, на которых подписан текущий юзер."""
         user = request.user
         queryset = User.objects.filter(author__follower=user)
         pages = self.paginate_queryset(queryset)

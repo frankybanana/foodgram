@@ -3,11 +3,14 @@ from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet
 
 from .models import Ingredient, Recipe, RecipeIngredient, Tag
-from backend.constants import INGREDIENTS_PER_PAGE, OBJ_PER_PAGE
+from backend.constants import (EXTRA_FORM_ADMIN,
+                               INGREDIENTS_PER_PAGE,
+                               OBJ_PER_PAGE)
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
+    """Конфигурация администратора для ингредиентов."""
     list_display = (
         'name',
         'measurement_unit',
@@ -18,6 +21,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    """Конфигурация администратора для тегов."""
     list_display = (
         'name',
         'slug',
@@ -40,12 +44,13 @@ class RecipeIngredientInlineFormSet(BaseInlineFormSet):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
-    extra = 1
+    extra = EXTRA_FORM_ADMIN
     formset = RecipeIngredientInlineFormSet
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    """Конфигурация администратора для рецептов."""
     list_display = (
         'author',
         'name',

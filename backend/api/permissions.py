@@ -2,6 +2,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAuthorOrReadOnly(BasePermission):
+    """ Класс разрешений на действия с контентом."""
 
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS

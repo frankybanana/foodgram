@@ -8,6 +8,7 @@ User = get_user_model()
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    """Конфигурация администратора для пользователей."""
     list_display = (
         'username',
         'email',

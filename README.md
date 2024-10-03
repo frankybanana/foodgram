@@ -1,13 +1,5 @@
 ﻿# 🍉 [Foodgram](https://www.foodbananagram.hopto.org/)
 
-### Технологии:
-
-- Python 
-- Docker
-- Nginx
-- Django 
-- djangorestframework
-
 ### Данные для доступа к админке:
 🍪 сайт: [foodbananagram.hopto.org](https://www.foodbananagram.hopto.org/)
 

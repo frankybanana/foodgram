@@ -6,6 +6,7 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
+    """Загрузка данных в модель."""
     help = 'Imports data from a CSV file into MyModel'
 
     def add_arguments(self, parser):
@@ -27,8 +28,8 @@ class Command(BaseCommand):
                         measurement_unit=row[unit_of_measurement_csv],
                     )
                     if not created:
-                        print(f"Ингредиент {obj} уже есть в базе данных.")
+                        print(f'Ингредиент {obj} уже есть в базе данных.')
                 except Exception as err:
-                    print(f"Ошибка в строке {row}: {err}")
+                    print(f'Ошибка в строке {row}: {err}')
 
-        print("Данные успешно загружены в модель.")
+        print('Данные успешно загружены в модель.')

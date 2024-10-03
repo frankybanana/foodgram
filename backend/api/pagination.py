@@ -4,6 +4,7 @@ from backend.constants import OBJ_PER_PAGE
 
 
 class RecipePagination(PageNumberPagination):
+    """Пагинатор с атрибутом лимита количества выведенных страниц."""
 
     page_size_query_param = 'limit'
     page_size = OBJ_PER_PAGE
