@@ -226,32 +226,61 @@ class CustomUserViewSet(UserViewSet):
         detail=True
     )
     def subscribe(self, request, id):
-        """Подписывает текущего юзера на другого пользователя."""
         user = request.user
         author = get_object_or_404(User, id=id)
+
         if request.method == 'POST':
-            if author.follower.filter(follower=user).exists():
-                return Response(
-                    'Вы уже подписаны на этого автора',
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             if user == author:
                 return Response(
                     'Невозможно подписаться на самого себя',
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = FollowSerializer(author, context={'request': request})
+            if author.follower.filter(follower=user).exists():
+                return Response(
+                    'Вы уже подписаны на этого автора',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             Follow.objects.create(follower=user, author=author)
+            serializer = FollowSerializer(author, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if not author.follower.filter(follower=user).exists():
-            return Response(
-                'Подписки не найдено',
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        subscribe = get_object_or_404(Follow, follower=user, author=author)
-        subscribe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'DELETE':
+            subscribe = author.follower.filter(follower=user).first()
+            if not subscribe:
+                return Response(
+                    'Подписки не найдено',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            subscribe.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def subscribe(self, request, id):
+    #     """Подписывает текущего юзера на другого пользователя."""
+    #     user = request.user
+    #     author = get_object_or_404(User, id=id)
+    #     if request.method == 'POST':
+    #         if author.follower.filter(follower=user).exists():
+    #             return Response(
+    #                 'Вы уже подписаны на этого автора',
+    #                 status=status.HTTP_400_BAD_REQUEST
+    #             )
+    #         if user == author:
+    #             return Response(
+    #                 'Невозможно подписаться на самого себя',
+    #                 status=status.HTTP_400_BAD_REQUEST
+    #             )
+    #         serializer = FollowSerializer(author, context={'request': request})
+    #         Follow.objects.create(follower=user, author=author)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #
+    #     if not author.follower.filter(follower=user).exists():
+    #         return Response(
+    #             'Подписки не найдено',
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+    #     subscribe = get_object_or_404(Follow, follower=user, author=author)
+    #     subscribe.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['get', ],
