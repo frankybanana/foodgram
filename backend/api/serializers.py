@@ -59,9 +59,9 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Проверяет подписку текущего пользователя на объект запроса."""
         return (
-            self.context.get('request').user.is_authenticated
+            self.context['request'].user.is_authenticated
             and Follow.objects.filter(
-                follower=self.context.get('request').user,
+                follower=self.context['request'].user,
                 author=obj.id
             ).exists()
         )
@@ -100,6 +100,7 @@ class FollowSerializer(CustomUserSerializer):
         )
 
     def validate(self, data):
+        """Проверка невозможности подписки на самого себя."""
         author = data.get('author')
         follower = self.context.get('request').user
         if follower == author:
@@ -171,9 +172,9 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Проверяет, есть ли рецепт в избранном."""
         return (
-            self.context.get('request').user.is_authenticated
+            self.context['request'].user.is_authenticated
             and Favorite.objects.filter(
-                user=self.context.get('request').user,
+                user=self.context['request'].user,
                 recipe=obj
             ).exists()
         )
@@ -181,9 +182,9 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Проверяет, есть ли рецепт в списке покупок."""
         return (
-            self.context.get('request').user.is_authenticated
+            self.context['request'].user.is_authenticated
             and ShoppingCart.objects.filter(
-                user=self.context.get('request').user,
+                user=self.context['request'].user,
                 recipe=obj
             ).exists()
         )
@@ -243,19 +244,19 @@ class CreateRecipesSerializer(serializers.ModelSerializer):
             raise ValidationError('Нужно добавить хотя бы один тег!')
 
         ingredients_list = data['ingredients']
-        ingredients = []
+        ingredients = set()
 
         for ingredient in ingredients_list:
             if not Ingredient.objects.filter(id=ingredient['id']).exists():
                 raise ValidationError('Такого ингредиента нет!')
             ingredients.append(ingredient['id'])
-            if ingredients.count(ingredient['id']) > 1:
+            if ingredient['id'] in ingredients:
                 raise ValidationError(
                     'Нельзя включать два одинаковых ингредиента!'
                 )
 
         tags_list = data['tags']
-        tags = []
+        tags = set()
         for tag in tags_list:
             if tag in tags:
                 raise ValidationError('Нельзя указать два одинаковых тега!')
