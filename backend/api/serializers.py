@@ -4,7 +4,12 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
 from api.fields import Base64ImageField
-from backend.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH
+from backend.constants import (MAX_AMOUNT_INGREDIENTS,
+                               MAX_COOKING_TIME,
+                               MAX_EMAIL_LENGTH,
+                               MAX_USERNAME_LENGTH,
+                               MIN_AMOUNT_INGREDIENTS,
+                               MIN_COOKING_TIME)
 from recipes.models import (Favorite,
                             Ingredient,
                             Recipe,
@@ -105,7 +110,7 @@ class FollowSerializer(CustomUserSerializer):
         follower = self.context.get('request').user
         if follower == author:
             raise ValidationError(
-                detail='Вы не можете подписаться на самого себя!',
+                detail='Подписка на самого себя невозможна!',
                 code=status.HTTP_400_BAD_REQUEST
             )
         return data
@@ -208,6 +213,13 @@ class RecipesSerializer(serializers.ModelSerializer):
 class CreateRecipesIngredientsSerializer(serializers.ModelSerializer):
     """Вспомогательный сериализатор для связи рецептов и ингредиентов."""
     id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    def validate_amount(self, value):
+        """Проверка значения поля amount."""
+        if value < MIN_AMOUNT_INGREDIENTS or value > MAX_AMOUNT_INGREDIENTS:
+            raise ValidationError('Значение должно быть в диапазоне от 1 до 32000.')
+        return value
 
     class Meta:
         model = RecipeIngredient
@@ -223,6 +235,7 @@ class CreateRecipesSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True
     )
     image = Base64ImageField(required=True, allow_null=True)
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
@@ -243,10 +256,10 @@ class CreateRecipesSerializer(serializers.ModelSerializer):
         if not data.get('tags'):
             raise ValidationError('Нужно добавить хотя бы один тег!')
 
-        ingredients_list = data['ingredients']
+        ingredient_list = data['ingredients']
         ingredients = set()
 
-        for ingredient in ingredients_list:
+        for ingredient in ingredient_list:
             if not Ingredient.objects.filter(id=ingredient['id']).exists():
                 raise ValidationError('Такого ингредиента нет!')
             ingredients.append(ingredient['id'])
@@ -262,6 +275,12 @@ class CreateRecipesSerializer(serializers.ModelSerializer):
                 raise ValidationError('Нельзя указать два одинаковых тега!')
             tags.append(tag)
         return data
+
+    def validate_cooking_time(self, value):
+        """Проверка значения поля amount."""
+        if value < MIN_COOKING_TIME or value > MAX_COOKING_TIME:
+            raise ValidationError('Значение должно быть в диапазоне от 1 до 32000.')
+        return value
 
     def bulk_create_update(self, ingredients, recipe):
         ingredient_list = []
