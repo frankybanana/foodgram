@@ -74,7 +74,7 @@ class Recipe(models.Model):
         default=None,
         verbose_name='Изображение'
     )
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField('Название', max_length=MAX_NAME_LENGTH)
     text = models.TextField('Описание')
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
@@ -97,6 +97,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -137,6 +138,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         default_related_name = 'recipe_ingredient'
         verbose_name = 'ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
@@ -167,6 +169,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
 
@@ -196,6 +199,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'список покупок'
         verbose_name_plural = 'Списки покупок'
 

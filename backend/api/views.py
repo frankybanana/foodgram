@@ -69,7 +69,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def add_or_delete(self, model, pk, message, request):
+    def add_recipe(self, model, pk, message, request):
+        """Добавляет рецепт."""
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         related_recipe = model.objects.filter(user=user, recipe=recipe)
@@ -84,10 +85,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
             serializer = ShortRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if related_recipe.exists():
-            related_recipe.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    def delete_recipe(self, model, pk, request):
+        """Удаляет рецепт."""
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=pk)
+        related_recipe = model.objects.filter(user=user, recipe=recipe)
+
+        if request.method == 'DELETE':
+            if related_recipe.exists():
+                related_recipe.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,
@@ -126,7 +134,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         """Возвращает список покупок в формате txt."""
         user = request.user
-        recipes = ShoppingCart.objects.filter(user=user).values_list('recipe')
+        recipes = user.shopping_cart.values_list('recipe', flat=True)
         ingredients = (
             RecipeIngredient.objects.filter(
                 recipe__in=recipes
@@ -222,7 +230,7 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            if Follow.objects.filter(follower=user, author=author).exists():
+            if author.follower.filter(follower=user).exists():
                 return Response(
                     'Вы уже подписаны на этого автора',
                     status=status.HTTP_400_BAD_REQUEST
@@ -232,14 +240,11 @@ class CustomUserViewSet(UserViewSet):
                     'Невозможно подписаться на самого себя',
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = FollowSerializer(
-                author,
-                context={"request": request, }
-            )
+            serializer = FollowSerializer(author, context={'request': request})
             Follow.objects.create(follower=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if not Follow.objects.filter(follower=user, author=author).exists():
+        if not author.follower.filter(follower=user).exists():
             return Response(
                 'Подписки не найдено',
                 status=status.HTTP_400_BAD_REQUEST
@@ -258,6 +263,6 @@ class CustomUserViewSet(UserViewSet):
         queryset = User.objects.filter(author__follower=user)
         pages = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
-            pages, many=True, context={"request": request}
+            pages, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)

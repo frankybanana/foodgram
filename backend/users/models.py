@@ -35,6 +35,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password', ]
 
     class Meta:
+        ordering = ('username',)
         verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -61,6 +62,7 @@ class Follow(models.Model):
     )
 
     class Meta:
+        ordering = ('author',)
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
