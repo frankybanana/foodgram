@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer, UserCreateSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
 from api.fields import Base64ImageField
@@ -98,6 +98,16 @@ class FollowSerializer(CustomUserSerializer):
             'recipes_count',
             'avatar'
         )
+
+    def validate(self, data):
+        author = data.get('author')
+        follower = self.context.get('request').user
+        if follower == author:
+            raise ValidationError(
+                detail='Вы не можете подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
     def get_recipes(self, obj):
         """Возращает рецепты согласно параметру "recipes_limit" в запросе."""
