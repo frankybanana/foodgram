@@ -10,13 +10,10 @@ from backend.constants import (MAX_AMOUNT_INGREDIENTS,
                                MAX_USERNAME_LENGTH,
                                MIN_AMOUNT_INGREDIENTS,
                                MIN_COOKING_TIME)
-from recipes.models import (Favorite,
-                            Ingredient,
+from recipes.models import (Ingredient,
                             Recipe,
                             RecipeIngredient,
-                            ShoppingCart,
                             Tag)
-from users.models import Follow
 
 User = get_user_model()
 
@@ -63,13 +60,9 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         """Проверяет подписку текущего пользователя на объект запроса."""
-        return (
-            self.context['request'].user.is_authenticated
-            and Follow.objects.filter(
-                follower=self.context['request'].user,
-                author=obj.id
-            ).exists()
-        )
+        user = self.context['request'].user
+        return (user.is_authenticated
+                and user.follower.filter(author=obj).exists())
 
 
 class CustomUserAvatarSerializer(UserSerializer):
@@ -119,7 +112,7 @@ class FollowSerializer(CustomUserSerializer):
         """Возращает рецепты согласно параметру "recipes_limit" в запросе."""
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-        recipes = Recipe.objects.filter(author=obj.id)
+        recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
         serializer = ShortRecipeSerializer(recipes, many=True, read_only=True)
@@ -130,7 +123,7 @@ class FollowSerializer(CustomUserSerializer):
         Подсчитывает кол-во рецептов у пользователя,
         на которого подписан юзер.
         """
-        return Recipe.objects.filter(author=obj.id).count()
+        return obj.recipes.count()
 
 
 class TagsSerializer(serializers.ModelSerializer):
@@ -176,23 +169,15 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверяет, есть ли рецепт в избранном."""
-        return (
-            self.context['request'].user.is_authenticated
-            and Favorite.objects.filter(
-                user=self.context['request'].user,
-                recipe=obj
-            ).exists()
-        )
+        user = self.context['request'].user
+        return (user.is_authenticated
+                and obj in user.favorites.all())
 
     def get_is_in_shopping_cart(self, obj):
         """Проверяет, есть ли рецепт в списке покупок."""
-        return (
-            self.context['request'].user.is_authenticated
-            and ShoppingCart.objects.filter(
-                user=self.context['request'].user,
-                recipe=obj
-            ).exists()
-        )
+        user = self.context['request'].user
+        return (user.is_authenticated and obj.id
+                in user.shopping_cart.values_list('recipe', flat=True))
 
     class Meta:
         model = Recipe
@@ -218,7 +203,8 @@ class CreateRecipesIngredientsSerializer(serializers.ModelSerializer):
     def validate_amount(self, value):
         """Проверка значения поля amount."""
         if value < MIN_AMOUNT_INGREDIENTS or value > MAX_AMOUNT_INGREDIENTS:
-            raise ValidationError('Значение должно быть в диапазоне от 1 до 32000.')
+            raise ValidationError('Значение должно быть в диапазоне '
+                                  'от 1 до 32000.')
         return value
 
     class Meta:
@@ -279,7 +265,8 @@ class CreateRecipesSerializer(serializers.ModelSerializer):
     def validate_cooking_time(self, value):
         """Проверка значения поля amount."""
         if value < MIN_COOKING_TIME or value > MAX_COOKING_TIME:
-            raise ValidationError('Значение должно быть в диапазоне от 1 до 32000.')
+            raise ValidationError('Значение должно быть в диапазоне '
+                                  'от 1 до 32000.')
         return value
 
     def bulk_create_update(self, ingredients, recipe):
