@@ -235,11 +235,6 @@ class CustomUserViewSet(UserViewSet):
                     'Вы уже подписаны на этого автора',
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if user == author:
-                return Response(
-                    'Невозможно подписаться на самого себя',
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             serializer = FollowSerializer(author, context={'request': request})
             Follow.objects.create(follower=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

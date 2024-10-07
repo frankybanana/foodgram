@@ -100,7 +100,7 @@ class FollowSerializer(CustomUserSerializer):
     def validate(self, data):
         """Проверка невозможности подписки на самого себя."""
         author = data.get('author')
-        follower = self.context.get('request').user
+        follower = self.context['request'].user
         if follower == author:
             raise ValidationError(
                 detail='Подписка на самого себя невозможна!',
@@ -110,7 +110,7 @@ class FollowSerializer(CustomUserSerializer):
 
     def get_recipes(self, obj):
         """Возращает рецепты согласно параметру "recipes_limit" в запросе."""
-        request = self.context.get('request')
+        request = self.context['request']
         limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
         if limit:
@@ -176,8 +176,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Проверяет, есть ли рецепт в списке покупок."""
         user = self.context['request'].user
-        return (user.is_authenticated and obj.id
-                in user.shopping_cart.values_list('recipe', flat=True))
+        return (user.is_authenticated
+                and user.shopping_cart.filter(recipe=obj.id).exists())
 
     class Meta:
         model = Recipe
